@@ -34,7 +34,6 @@ typedef struct
 // TRANSLATOR
 
 #define MAXPARAMLEN 15
-#define MAXLENOFSPACE 10
 
 // COMMANDLINE
 /*  PUSH = 1
