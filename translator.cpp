@@ -98,7 +98,7 @@ void translator(FILE* source, FILE* distance, FILE* binarycode)
 
                     fseek(source, -paramlen, SEEK_CUR);
 
-                    datatype num = 0;
+                    int num = 0;
                     fscanf(source, "%d", &num);
                     fprintf(distance, "%d\n", num);
                     commandLine[translatorIp++] = num;
