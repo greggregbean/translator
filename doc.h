@@ -11,7 +11,8 @@
 
 enum CMDS
 {
-    #include "commands.h"
+    #include "easycommands.h"
+    #include "complexcommands.h"
 
     RAX   = 1,
     RBX   = 2,

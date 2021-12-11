@@ -1,15 +1,56 @@
-#define DEF_CMD(strCommand, numCommand) \
+#define DEF_CMD(strCommand, numCommand)                       \
     if (stricmp(command, #strCommand) == 0) return numCommand; \
     else
 
 int determineCommand(char* command)
 {
-    #include "commands.h"
-    /*else*/ printf("You are all zasrantsy. \n");
+    #include "easycommands.h"
+    #include "complexcommands.h"
+    /*else*/ printf("You are all zasrantsy: \"%s\" \n", command);
 }
 
 #undef DEF_CMD
 
+int paramDeterminator(char* param, FILE* source, FILE* distance,  int* translatorIp, int* commandLine, int numOfCommand)
+{
+        if (strcmp(param, "rax") == 0)
+        {
+            fprintf(distance, "%d 1\n", numOfCommand);
+            commandLine[(*translatorIp)++] = numOfCommand;
+            commandLine[(*translatorIp)++] = 1;
+            getc(source);
+            return 1;
+        }
+
+        else if (strcmp(param, "rbx") == 0)
+        {
+            fprintf(distance, "%d 2\n", numOfCommand);
+            commandLine[(*translatorIp)++] = numOfCommand;
+            commandLine[(*translatorIp)++] = 2;
+            getc(source);
+            return 1;
+        }
+
+        else if (strcmp(param, "rcx") == 0)
+        {
+            fprintf(distance, "%d 3\n", numOfCommand);
+            commandLine[(*translatorIp)++] = numOfCommand;
+            commandLine[(*translatorIp)++] = 3;
+            getc(source);
+            return 1;
+        }
+
+        else if (strcmp(param, "rdx") == 0)
+        {
+            fprintf(distance, "%d 4\n", numOfCommand);
+            commandLine[(*translatorIp)++] = numOfCommand;
+            commandLine[(*translatorIp)++] = 4;
+            getc(source);
+            return 1;
+        }
+
+        return 0;
+}
 
 void translator(FILE* source, FILE* distance, FILE* binarycode)
 {
@@ -37,9 +78,13 @@ void translator(FILE* source, FILE* distance, FILE* binarycode)
 
         fscanf(source, "%s", &command);
 
+        printf("Current command: \"%s\" \n", command);
+
         char spaceOrEnter = getc(source);
 
         int typeOfCommand = determineCommand(command);
+
+        printf("Type of command: %d \n", typeOfCommand);
 
         if (typeOfCommand == CMD_PUSH)
         {
@@ -47,41 +92,14 @@ void translator(FILE* source, FILE* distance, FILE* binarycode)
 
                 fscanf(source, "%s", &param);
 
-                if (strcmp(param, "rax") == 0)
-                {
-                    fprintf(distance, "101 1\n");
-                    commandLine[translatorIp++] = 101;
-                    commandLine[translatorIp++] = 1;
-                    getc(source);
-                    continue;
-                }
+                printf("Current param: \"%s\" \n", param);
 
-                else if (strcmp(param, "rbx") == 0)
-                {
-                    fprintf(distance, "101 2\n");
-                    commandLine[translatorIp++] = 101;
-                    commandLine[translatorIp++] = 2;
-                    getc(source);
-                    continue;
-                }
+                int result = paramDeterminator(param, source, distance,  &translatorIp, commandLine, CMD_PUSHR);
 
-                else if (strcmp(param, "rcx") == 0)
-                {
-                    fprintf(distance, "101 3\n");
-                    commandLine[translatorIp++] = 101;
-                    commandLine[translatorIp++] = 3;
-                    getc(source);
-                    continue;
-                }
+                printf("paramDeterminator() returned: %d \n", result);
 
-                else if (strcmp(param, "rdx") == 0)
-                {
-                    fprintf(distance, "101 4\n");
-                    commandLine[translatorIp++] = 101;
-                    commandLine[translatorIp++] = 4;
-                    getc(source);
+                if (result)
                     continue;
-                }
 
                 else
                 {
@@ -121,98 +139,23 @@ void translator(FILE* source, FILE* distance, FILE* binarycode)
 
                 fscanf(source, "%s", &param);
 
-                if (strcmp(param, "rax") == 0)
-                {
-                    fprintf(distance, "102 1\n");
-                    commandLine[translatorIp++] = 102;
-                    commandLine[translatorIp++] = 1;
-                    getc(source);
-                    continue;
-                }
+                paramDeterminator(param, source, distance,  &translatorIp, commandLine, CMD_POPR);
 
-                else if (strcmp(param, "rbx") == 0)
-                {
-                    fprintf(distance, "102 2\n");
-                    commandLine[translatorIp++] = 102;
-                    commandLine[translatorIp++] = 2;
-                    getc(source);
-                    continue;
-                }
-
-                else if (strcmp(param, "rcx") == 0)
-                {
-                    fprintf(distance, "102 3\n");
-                    commandLine[translatorIp++] = 102;
-                    commandLine[translatorIp++] = 3;
-                    getc(source);
-                    continue;
-                }
-
-                else if (strcmp(param, "rdx") == 0)
-                {
-                    fprintf(distance, "102 4\n");
-                    commandLine[translatorIp++] = 102;
-                    commandLine[translatorIp++] = 4;
-                    getc(source);
-                    continue;
-                }
-
-            }
-
-            else if (typeOfCommand == CMD_OUT)
-            {
-                fprintf(distance, "3\n");
-                commandLine[translatorIp++] = 3;
                 continue;
+
             }
 
-            else if (typeOfCommand == CMD_ADD)
-            {
-                fprintf(distance, "4\n");
-                commandLine[translatorIp++] = 4;
-                continue;
-            }
+            #define DEF_CMD(strCommand, numCommand)     \
+            else if (typeOfCommand == numCommand)        \
+            {                                             \
+                fprintf(distance, "%d\n", numCommand);     \
+                commandLine[translatorIp++] = numCommand;   \
+                continue;                                    \
+            }                                                 \
 
-            else if (typeOfCommand == CMD_SUB)
-            {
-                fprintf(distance, "5\n");
-                commandLine[translatorIp++] = 5;
-                continue;
-            }
+            #include "easycommands.h"
 
-            else if (typeOfCommand == CMD_MUL)
-            {
-                fprintf(distance, "6\n");
-                commandLine[translatorIp++] = 6;
-                continue;
-            }
-
-            else if (typeOfCommand == CMD_DIV)
-            {
-                fprintf(distance, "7\n");
-                commandLine[translatorIp++] = 7;
-                continue;
-            }
-
-            else if (typeOfCommand == CMD_SQRT)
-            {
-                fprintf(distance, "8\n");
-                commandLine[translatorIp++] = 8;
-                continue;
-            }
-
-            else if (typeOfCommand == CMD_IN)
-            {
-                fprintf(distance, "9\n");
-                commandLine[translatorIp++] = 9;
-                continue;
-            }
-
-            else if (typeOfCommand == CMD_HLT)
-            {
-                fprintf(distance, "-1\n");
-                commandLine[translatorIp++] = -1;
-            }
+            #undef DEF_CMD
 
             else if (typeOfCommand == CMD_NOCOMMAND)
             {
