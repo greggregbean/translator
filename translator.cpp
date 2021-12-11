@@ -28,7 +28,7 @@ int paramDeterminator(char* param, FILE* source, FILE* distance,  int* translato
                 commandLine[(*translatorIp)++] = numOfCommand;    \
                 commandLine[(*translatorIp)++] = num;              \
                 getc(source);                                       \
-                return 1;                                        \
+                return 1;                                            \
             }                                                         \
             else
 
