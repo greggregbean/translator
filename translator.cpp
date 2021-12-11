@@ -6,7 +6,11 @@ int determineCommand(char* command)
 {
     #include "easycommands.h"
     #include "complexcommands.h"
-    /*else*/ printf("You are all zasrantsy: \"%s\" \n", command);
+    /*else*/
+    {
+        if(command[0] != '\0')
+            printf("You are all zasrantsy: \"%s\" \n", command);
+    }
 }
 
 #undef DEF_CMD
