@@ -1,17 +1,15 @@
+#define DEF_CMD(strCommand, numCommand) \
+    if (stricmp(command, #strCommand) == 0) return numCommand; \
+    else
+
 int determineCommand(char* command)
 {
-    if      (strcmp(command, "push") == 0) return CMD_PUSH;
-    else if (strcmp(command, "pop")  == 0) return CMD_POP;
-    else if (strcmp(command, "out")  == 0) return CMD_OUT;
-    else if (strcmp(command, "add")  == 0) return CMD_ADD;
-    else if (strcmp(command, "sub")  == 0) return CMD_SUB;
-    else if (strcmp(command, "mul")  == 0) return CMD_MUL;
-    else if (strcmp(command, "div")  == 0) return CMD_DIV;
-    else if (strcmp(command, "sqrt") == 0) return CMD_SQRT;
-    else if (strcmp(command, "in")   == 0) return CMD_IN;
-    else if (strcmp(command, "hlt")  == 0) return CMD_HLT;
-    else                                   return CMD_NOCOMMAND;
+    #include "commands.h"
+    /*else*/ printf("You are all zasrantsy. \n");
 }
+
+#undef DEF_CMD
+
 
 void translator(FILE* source, FILE* distance, FILE* binarycode)
 {
