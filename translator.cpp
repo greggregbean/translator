@@ -1,59 +1,43 @@
-#define DEF_CMD(strCommand, numCommand)                       \
-    if (stricmp(command, #strCommand) == 0) return numCommand; \
-    else
-
 int determineCommand(char* command)
 {
+    #define DEF_CMD(strCommand, numCommand)                       \
+        if (stricmp(command, #strCommand) == 0) return numCommand; \
+        else
+
     #include "easycommands.h"
+
     #include "complexcommands.h"
+
+    #undef DEF_CMD
+
     /*else*/
     {
-        if(command[0] != '\0')
-            printf("You are all zasrantsy: \"%s\" \n", command);
+        if (command[0] != '\0')
+            printf("WRONG COMMAND: \"%s\" \n", command);
+        return 0;
     }
-}
 
-#undef DEF_CMD
+}
 
 int paramDeterminator(char* param, FILE* source, FILE* distance,  int* translatorIp, int* commandLine, int numOfCommand)
 {
-        if (strcmp(param, "rax") == 0)
-        {
-            fprintf(distance, "%d 1\n", numOfCommand);
-            commandLine[(*translatorIp)++] = numOfCommand;
-            commandLine[(*translatorIp)++] = 1;
-            getc(source);
-            return 1;
-        }
+        #define DEF_REG(name, num)                            \
+            if(stricmp(param, #name) == 0)                     \
+            {                                                   \
+                fprintf(distance, "%d %d \n", numOfCommand, num);\
+                commandLine[(*translatorIp)++] = numOfCommand;    \
+                commandLine[(*translatorIp)++] = num;              \
+                getc(source);                                       \
+                return 1;                                        \
+            }                                                         \
+            else
 
-        else if (strcmp(param, "rbx") == 0)
-        {
-            fprintf(distance, "%d 2\n", numOfCommand);
-            commandLine[(*translatorIp)++] = numOfCommand;
-            commandLine[(*translatorIp)++] = 2;
-            getc(source);
-            return 1;
-        }
+        #include "registers.h"
 
-        else if (strcmp(param, "rcx") == 0)
-        {
-            fprintf(distance, "%d 3\n", numOfCommand);
-            commandLine[(*translatorIp)++] = numOfCommand;
-            commandLine[(*translatorIp)++] = 3;
-            getc(source);
-            return 1;
-        }
+        #undef DEF_REG
 
-        else if (strcmp(param, "rdx") == 0)
-        {
-            fprintf(distance, "%d 4\n", numOfCommand);
-            commandLine[(*translatorIp)++] = numOfCommand;
-            commandLine[(*translatorIp)++] = 4;
-            getc(source);
-            return 1;
-        }
-
-        return 0;
+        /*else*/
+            return 0;
 }
 
 void translator(FILE* source, FILE* distance, FILE* binarycode)
@@ -76,11 +60,11 @@ void translator(FILE* source, FILE* distance, FILE* binarycode)
 
     for (int i = 0; i < numoflines-1; i++)
     {
+        printf("TranslatorIP: %d \n", translatorIp);
+
         char command[5] = {'\0'};
 
-        int k = 0;
-
-        fscanf(source, "%s", &command);
+        fscanf(source, "%s", command);
 
         printf("Current command: \"%s\" \n", command);
 
@@ -94,7 +78,7 @@ void translator(FILE* source, FILE* distance, FILE* binarycode)
         {
                 char param [MAXPARAMLEN] = {'\0'};
 
-                fscanf(source, "%s", &param);
+                fscanf(source, "%s", param);
 
                 printf("Current param: \"%s\" \n", param);
 
@@ -141,21 +125,25 @@ void translator(FILE* source, FILE* distance, FILE* binarycode)
 
                 char param [MAXPARAMLEN] = {'\0'};
 
-                fscanf(source, "%s", &param);
+                fscanf(source, "%s", param);
 
-                paramDeterminator(param, source, distance,  &translatorIp, commandLine, CMD_POPR);
+                printf("Current param: \"%s\" \n", param);
+
+                int result = paramDeterminator(param, source, distance,  &translatorIp, commandLine, CMD_PUSHR);
+
+                printf("paramDeterminator() returned: %d \n", result);
 
                 continue;
 
             }
 
-            #define DEF_CMD(strCommand, numCommand)     \
-            else if (typeOfCommand == numCommand)        \
-            {                                             \
-                fprintf(distance, "%d\n", numCommand);     \
-                commandLine[translatorIp++] = numCommand;   \
-                continue;                                    \
-            }                                                 \
+            #define DEF_CMD(strCommand, numCommand)         \
+                else if (typeOfCommand == numCommand)        \
+                {                                             \
+                    fprintf(distance, "%d\n", numCommand);     \
+                    commandLine[translatorIp++] = numCommand;   \
+                    continue;                                    \
+                }                                                 \
 
             #include "easycommands.h"
 
@@ -165,6 +153,8 @@ void translator(FILE* source, FILE* distance, FILE* binarycode)
             {
                 continue;
             }
+
+
     }
 
     fprintf(distance, "TRANSLATOR IP: %d \n", translatorIp);
@@ -185,4 +175,3 @@ void translator(FILE* source, FILE* distance, FILE* binarycode)
            "Numerical code is in numericalcode.txt\n"
            "Binary code is in binarycode.bin\n");
 }
-
