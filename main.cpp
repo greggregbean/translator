@@ -13,7 +13,9 @@ int main()
     FILE* numericalcode = fopen("numericalcode.txt", "w"); assert (numericalcode);
     FILE* binarycode    = fopen("binarycode.bin",    "w"); assert (binarycode);
 
-    translator(textcode, numericalcode, binarycode);
+    label labelBuffer [LENOFLABELBUFFER] = {'\0'};
+
+    translator(textcode, numericalcode, binarycode, labelBuffer);
 
     fclose(textcode);
 

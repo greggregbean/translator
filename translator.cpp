@@ -5,8 +5,8 @@ int determineCommand(char* command)
         else
 
     #include "easycommands.h"
-
-    #include "complexcommands.h"
+    #include "jumps.h"
+    #include "pushpop.h"
 
     #undef DEF_CMD
 
@@ -40,8 +40,10 @@ int paramDeterminator(char* param, FILE* source, FILE* distance,  int* translato
             return 0;
 }
 
-void translator(FILE* source, FILE* distance, FILE* binarycode)
+void translator(FILE* source, FILE* distance, FILE* binarycode, label* labelBuffer)
 {
+    int labelIp = 0;
+
     int commandLine [LENOFCOMMANDLINE] = {'\0'};
     int translatorIp = 0;
 
@@ -62,7 +64,7 @@ void translator(FILE* source, FILE* distance, FILE* binarycode)
     {
         printf("TranslatorIP: %d \n", translatorIp);
 
-        char command[5] = {'\0'};
+        char command[MAXCOMMANDLEN] = {'\0'};
 
         fscanf(source, "%s", command);
 
@@ -118,8 +120,8 @@ void translator(FILE* source, FILE* distance, FILE* binarycode)
 
                 if (spaceOrEnter == '\n')
                 {
-                    fprintf(distance, "2\n");
-                    commandLine[translatorIp++] = 2;
+                    fprintf(distance, "%d\n", CMD_POP);
+                    commandLine[translatorIp++] = CMD_POP;
                     continue;
                 }
 
@@ -149,11 +151,58 @@ void translator(FILE* source, FILE* distance, FILE* binarycode)
 
             #undef DEF_CMD
 
+            else if (typeOfCommand == CMD_JMP)
+            {
+                fprintf(distance, "%d ", CMD_JMP);
+
+                commandLine[translatorIp++] = CMD_JMP;
+
+                char nameOfLabel [MAXLABELNAME] = {'\0'};
+
+                fscanf(source, "%s", nameOfLabel);
+
+                printf("Name of label: \"%s\" \n", nameOfLabel);
+
+                printf("First label: \"%s\" (%d) \n", labelBuffer[0].name, labelBuffer[0].num);
+
+                int privDecOfLabel = NO;
+
+                for (int k = 0; k < labelIp + 1; k++)
+                {
+                    if (strcmp(nameOfLabel, labelBuffer[i].name) == 0)
+                    {
+                        fprintf(distance, "%d\n", labelBuffer[k].num);
+
+                        commandLine[translatorIp++] = labelBuffer[k].num;
+
+                        privDecOfLabel = YES;
+
+                        break;
+                    }
+                }
+
+                if (privDecOfLabel == NO)
+                {
+                    strcpy(labelBuffer[labelIp].name, nameOfLabel);
+
+                    labelBuffer[labelIp].num = -1;
+
+                    fprintf(distance, "%d\n", labelBuffer[labelIp].num);
+
+                    commandLine[translatorIp++] = labelBuffer[labelIp].num;
+
+                    labelIp++;
+                }
+
+                printf("New first label: \"%s\" (%d) \n", labelBuffer[0].name, labelBuffer[0].num);
+
+                continue;
+            }
+
             else if (typeOfCommand == CMD_NOCOMMAND)
             {
                 continue;
             }
-
 
     }
 

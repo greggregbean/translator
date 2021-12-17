@@ -1,10 +1,23 @@
 // TRANSLATOR
 
+#define YES 1
+#define NO 0
+
 #define LENOFCOMMANDLINE 100
-#define LENOFREGARR 4
+#define MAXCOMMANDLEN 10
 #define MAXPARAMLEN 15
 
-// COMMANDLINE (CMD_)
+#define LENOFLABELBUFFER 100
+#define MAXLABELNAME 5
+
+typedef struct
+{
+    char name [MAXLABELNAME];
+    int num;
+
+} label;
+
+// COMMANDLINE
 
 #define DEF_CMD( name, num, ... ) \
     CMD_##name = num,
@@ -12,7 +25,8 @@
 enum CMDS
 {
     #include "easycommands.h"
-    #include "complexcommands.h"
+    #include "pushpop.h"
+    #include "jumps.h"
 
     RAX   = 1,
     RBX   = 2,
@@ -26,7 +40,7 @@ enum CMDS
 
 int determineCommand(char* command);
 int paramDeterminator(char* param, FILE* source, FILE* distance,  int* translatorIp, int* commandLine, int numOfCommand);
-void translator(FILE* source, FILE* distance, FILE* binarycode);
+void translator(FILE* source, FILE* distance, FILE* binarycode, label* labelBuffer);
 
 #include "translator.cpp"
 

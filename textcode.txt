@@ -1,5 +1,5 @@
-push   5     
-push rax     
+push   5
+push rax
 push rbx
 push rcx
 push rdx
@@ -15,10 +15,7 @@ mul
 div
 sqrt
 in
+jmp next
 hlt
-
-
-
-
 
 
