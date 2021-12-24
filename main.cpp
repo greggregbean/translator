@@ -15,6 +15,8 @@ int main()
 
     label labelBuffer [LENOFLABELBUFFER] = {'\0'};
 
+    printf("\n\n****** С ДР, Ванек! *****\n\n\n");
+
     translator(textcode, numericalcode, binarycode, labelBuffer);
 
     fclose(textcode);

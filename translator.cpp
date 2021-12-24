@@ -1,3 +1,24 @@
+void DumpCommandLine (int* CommandLine, int translatorIp)
+{
+    printf ("--------------------------------------------\n");
+
+    for (int i = 0; i < translatorIp; i++)
+    {
+        printf("%03d ", i);
+    }
+
+    printf("\n");
+
+    for (int i = 0; i < translatorIp; i++)
+    {
+        printf("%03d ", CommandLine[i]);
+    }
+
+    printf("\n");
+
+    printf ("--------------------------------------------\n");
+}
+
 int determineCommand(char* command)
 {
     #define DEF_CMD(strCommand, numCommand)                       \
@@ -16,6 +37,59 @@ int determineCommand(char* command)
             printf("WRONG COMMAND: \"%s\" \n", command);
         return 0;
     }
+
+}
+
+int labelDeterminator(FILE* source,
+                      char* nameOfLabel, int labelAdress,
+                      label* labelBuffer, int* labelsSize)
+{
+        if (nameOfLabel[0] == ':')
+        {
+            nameOfLabel++;
+        }
+
+        int i = 0;
+
+        for (i = 0; i < (*labelsSize); i++)
+        {
+            if (strcmp(nameOfLabel, labelBuffer[i].name) == 0)
+            {
+                return labelBuffer[i].num;
+            }
+        }
+
+        strcpy(labelBuffer[*labelsSize].name, nameOfLabel);
+
+        labelBuffer[*labelsSize].num = labelAdress;
+
+        printf("New label: \"%s\" (%d) \n", labelBuffer[*labelsSize].name, labelBuffer[*labelsSize].num);
+
+        (*labelsSize)++;
+
+        return -1;
+}
+
+
+void jumpDeterminator(FILE* source, FILE* distance,  int* translatorIp, int* commandLine, label* labelBuffer, int* labelsSize)
+{
+        fprintf(distance, "%d ", CMD_JMP);
+
+        commandLine[(*translatorIp)++] = CMD_JMP;
+
+        char nameOfLabel [MAXLABELNAME] = {'\0'};
+
+        fscanf(source, "%s", nameOfLabel);
+
+        printf("Name of label: \"%s\" \n", nameOfLabel);
+
+        int addr = labelDeterminator(source,
+                                     nameOfLabel, -1,
+                                     labelBuffer, labelsSize);
+
+        commandLine[(*translatorIp)++] = addr;
+
+        fprintf(distance, "%d\n", addr);
 
 }
 
@@ -42,7 +116,7 @@ int paramDeterminator(char* param, FILE* source, FILE* distance,  int* translato
 
 void translator(FILE* source, FILE* distance, FILE* binarycode, label* labelBuffer)
 {
-    int labelIp = 0;
+    int labelsSize = 0;
 
     int commandLine [LENOFCOMMANDLINE] = {'\0'};
     int translatorIp = 0;
@@ -60,13 +134,28 @@ void translator(FILE* source, FILE* distance, FILE* binarycode, label* labelBuff
 
     fseek(source, 0, SEEK_SET);
 
-    for (int i = 0; i < numoflines-1; i++)
+    for (int lineNum = 0; lineNum < numoflines-1; DumpCommandLine (commandLine, translatorIp), lineNum++)
     {
-        printf("TranslatorIP: %d \n", translatorIp);
+        printf("\nTranslatorIP: %d \n", translatorIp);
 
         char command[MAXCOMMANDLEN] = {'\0'};
 
         fscanf(source, "%s", command);
+
+
+
+        if (command[0] == ':')
+        {
+            printf("There is a label: \"%s\" \n", command);
+
+            labelDeterminator(source,
+                              command, translatorIp,
+                              labelBuffer, &labelsSize);
+
+
+
+            continue;
+        }
 
         printf("Current command: \"%s\" \n", command);
 
@@ -131,7 +220,7 @@ void translator(FILE* source, FILE* distance, FILE* binarycode, label* labelBuff
 
                 printf("Current param: \"%s\" \n", param);
 
-                int result = paramDeterminator(param, source, distance,  &translatorIp, commandLine, CMD_PUSHR);
+                int result = paramDeterminator(param, source, distance,  &translatorIp, commandLine, CMD_POPR);
 
                 printf("paramDeterminator() returned: %d \n", result);
 
@@ -153,48 +242,7 @@ void translator(FILE* source, FILE* distance, FILE* binarycode, label* labelBuff
 
             else if (typeOfCommand == CMD_JMP)
             {
-                fprintf(distance, "%d ", CMD_JMP);
-
-                commandLine[translatorIp++] = CMD_JMP;
-
-                char nameOfLabel [MAXLABELNAME] = {'\0'};
-
-                fscanf(source, "%s", nameOfLabel);
-
-                printf("Name of label: \"%s\" \n", nameOfLabel);
-
-                printf("First label: \"%s\" (%d) \n", labelBuffer[0].name, labelBuffer[0].num);
-
-                int privDecOfLabel = NO;
-
-                for (int k = 0; k < labelIp + 1; k++)
-                {
-                    if (strcmp(nameOfLabel, labelBuffer[i].name) == 0)
-                    {
-                        fprintf(distance, "%d\n", labelBuffer[k].num);
-
-                        commandLine[translatorIp++] = labelBuffer[k].num;
-
-                        privDecOfLabel = YES;
-
-                        break;
-                    }
-                }
-
-                if (privDecOfLabel == NO)
-                {
-                    strcpy(labelBuffer[labelIp].name, nameOfLabel);
-
-                    labelBuffer[labelIp].num = -1;
-
-                    fprintf(distance, "%d\n", labelBuffer[labelIp].num);
-
-                    commandLine[translatorIp++] = labelBuffer[labelIp].num;
-
-                    labelIp++;
-                }
-
-                printf("New first label: \"%s\" (%d) \n", labelBuffer[0].name, labelBuffer[0].num);
+                jumpDeterminator(source, distance, &translatorIp, commandLine, labelBuffer, &labelsSize);
 
                 continue;
             }
